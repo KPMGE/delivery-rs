@@ -4,6 +4,10 @@ use rdkafka::consumer::Consumer;
 use rdkafka::Message;
 use rdkafka::producer::BaseProducer;
 use rdkafka::producer::BaseRecord;
+use std::cell::RefCell;
+use std::fs::File;
+use std::io::BufRead;
+use std::io::BufReader;
 use std::str;
 use std::thread;
 use std::time::Duration;
@@ -20,7 +24,7 @@ struct Position {
 struct Route {
     id: i32,
     client_id: i32,
-    positions: Vec<Position>
+    positions: RefCell<Vec<Position>>
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -32,33 +36,33 @@ struct PartialRoutePosition {
     finished: bool 
 }
 
+impl Route {
+    fn load_positions(&self, file_path: &str) {
+        let file = File::open(file_path).expect("error when opening route file");
+        let reader = BufReader::new(file);
+
+        for line_res in reader.lines() {
+            let line = line_res.unwrap();
+            let (lat, lng) = line.split_once(",").unwrap();
+
+            self.positions.borrow_mut().push(Position {
+                lat: str::parse::<f64>(lat).unwrap(),
+                lng: str::parse::<f64>(lng).unwrap()
+            });
+        }
+    }
+}
+
 fn main() {
+    // create fictional_route with some id and client_id
     let fictional_route = Route {
         id: 1,
         client_id: 1,
-        positions: vec![
-            Position {
-                lat: 10.2,
-                lng: 23.1
-            },
-            Position {
-                lat: 10.2,
-                lng: 23.1
-            },
-            Position {
-                lat: 10.2,
-                lng: 23.1
-            },
-            Position {
-                lat: 10.2,
-                lng: 23.1
-            },
-            Position {
-                lat: 10.2,
-                lng: 23.1
-            }
-        ]
+        positions: RefCell::new(vec![])
     };
+
+    // load positions from file
+    fictional_route.load_positions("destinations/1.txt");
 
     // kafka config object
     // let consumer: BaseConsumer = ClientConfig::new()
@@ -89,7 +93,7 @@ fn main() {
         .expect("invalid client config");
 
     println!("sending positions of fictional_route: ");
-    for (idx, pos) in fictional_route.positions.iter().enumerate() {
+    for (idx, pos) in fictional_route.positions.borrow().iter().enumerate() {
         let mut partial_route = PartialRoutePosition {
             id: fictional_route.id,
             client_id: fictional_route.client_id,
@@ -97,7 +101,7 @@ fn main() {
             finished: false
         };
 
-        if idx == fictional_route.positions.len() - 1 {
+        if idx == fictional_route.positions.borrow().len() - 1 {
             partial_route.finished = true;
         }
 
@@ -111,3 +115,4 @@ fn main() {
         thread::sleep(Duration::from_secs(1));
     }
 }
+
