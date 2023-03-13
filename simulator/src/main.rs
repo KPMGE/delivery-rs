@@ -7,6 +7,21 @@ use rdkafka::producer::BaseRecord;
 use std::str;
 use std::thread;
 use std::time::Duration;
+use serde::{Deserialize, Serialize};
+
+#[derive(Serialize, Deserialize)]
+struct Position {
+    lat: f64,
+    lng: f64
+}
+
+#[derive(Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct Route {
+    id: i32,
+    client_id: i32,
+    positions: Vec<Position>
+}
 
 fn main() {
     // kafka config object
@@ -36,12 +51,24 @@ fn main() {
         .expect("invalid client config");
 
     for i in 0..100 {
-        println!("sending message: ");
+        println!("sending message: {}", i);
 
+        let route = Route {
+            id: i,
+            client_id: i,
+            positions: vec![
+                Position {
+                    lat: 10.34,
+                    lng: 12.23
+                }
+            ]
+        };
+
+        let route_str = serde_json::to_string_pretty(&route).expect("error when stringfying route");
         producer.send(
             BaseRecord::to("test")
                 .key(&format!("key-{}", i))
-                .payload(&format!("value-{}", i))
+                .payload(&route_str)
         ).expect("failed to send message");
 
         thread::sleep(Duration::from_secs(3));

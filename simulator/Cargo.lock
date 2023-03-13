@@ -136,6 +136,8 @@ name = "kafka-rust"
 version = "0.1.0"
 dependencies = [
  "rdkafka",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]
