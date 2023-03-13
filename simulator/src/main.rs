@@ -79,8 +79,9 @@ fn main() {
         .create()
         .expect("invalid client config");
 
+    const KAFKA_ROUTE_TOPIC: &str = "route";
     consumer
-        .subscribe(&["test"])
+        .subscribe(&[KAFKA_ROUTE_TOPIC])
         .expect("error when subscribing to the topics");
 
     println!("starting listening on topics: ");
@@ -98,10 +99,12 @@ fn main() {
                 positions: RefCell::new(Vec::new())
             };
 
-            route.load_positions("destinations/1.txt");
+            route.load_positions(format!("destinations/{}.txt", route.route_id).as_str());
 
             println!("sending positions of fictional_route: ");
-            send_route_to_kafka(&route, "position-tp");
+
+            const KAFKA_POSITION_TOPIC: &str = "positions";
+            send_route_to_kafka(&route, KAFKA_POSITION_TOPIC);
         }
     });
 
@@ -129,10 +132,10 @@ fn send_route_to_kafka(route: &Route, topic: &str) {
         let route_str = serde_json::to_string_pretty(&partial_route).expect("error when stringfying route");
         producer.send(
             BaseRecord::to(topic)
-                .key(&format!("key-{}", 1))
+                .key(&route.route_id)
                 .payload(&route_str)
         ).expect("failed to send message");
 
-        thread::sleep(Duration::from_secs(1));
+        thread::sleep(Duration::from_millis(200));
     }
 }
