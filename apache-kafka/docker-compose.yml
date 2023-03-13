@@ -1,14 +1,6 @@
 version: '3'
 
 services:
-  app: 
-    build: .
-    container_name: rust-kafka
-    volumes:
-      - .:/rust/src
-    extra_hosts: 
-      - "host.docker.internal:172.17.0.1"
-
   zookeeper: 
     image: confluentinc/cp-zookeeper:latest
     environment:
