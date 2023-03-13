@@ -9,13 +9,13 @@ use std::thread;
 use std::time::Duration;
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 struct Position {
     lat: f64,
     lng: f64
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct Route {
     id: i32,
@@ -41,7 +41,9 @@ fn main() {
             let msg = msg_res.unwrap();
             let value = msg.payload().unwrap();
             let value_str = str::from_utf8(value).unwrap();
-            println!("received value: {:?}", value_str);
+            let received_route = serde_json::from_str::<Route>(value_str).expect("error when parsing json route");
+
+            println!("received value: {:?}", received_route);
         }
     });
 
