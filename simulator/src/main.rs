@@ -13,6 +13,14 @@ use std::thread;
 use std::time::Duration;
 use serde::{Deserialize, Serialize};
 
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct KafkaRouteRequest {
+    route_id: String,
+    client_id: String
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 struct Position {
     lat: f64,
@@ -22,16 +30,16 @@ struct Position {
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct Route {
-    id: i32,
-    client_id: i32,
+    route_id: String,
+    client_id: String,
     positions: RefCell<Vec<Position>>
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct PartialRoutePosition {
-    id: i32,
-    client_id: i32,
+    route_id: String,
+    client_id: String,
     position: [f64; 2],
     finished: bool 
 }
@@ -56,8 +64,8 @@ impl Route {
 fn main() {
     // create fictional_route with some id and client_id
     let fictional_route = Route {
-        id: 1,
-        client_id: 1,
+        route_id: "1".to_string(),
+        client_id: "1".to_string(),
         positions: RefCell::new(vec![])
     };
 
@@ -65,49 +73,62 @@ fn main() {
     fictional_route.load_positions("destinations/1.txt");
 
     // kafka config object
-    // let consumer: BaseConsumer = ClientConfig::new()
-    //     .set("bootstrap.servers", "host.docker.internal:9094")
-    //     .set("group.id", "my-group")
-    //     .create()
-    //     .expect("invalid client config");
+    let consumer: BaseConsumer = ClientConfig::new()
+        .set("bootstrap.servers", "host.docker.internal:9094")
+        .set("group.id", "my-group")
+        .create()
+        .expect("invalid client config");
 
-    // consumer
-    //     .subscribe(&["test"])
-    //     .expect("error when subscribing to the topics");
+    consumer
+        .subscribe(&["test"])
+        .expect("error when subscribing to the topics");
 
-    // println!("starting listening on topics: ");
-    // thread::spawn(move || loop {
-    //     for msg_res in consumer.iter() {
-    //         let msg = msg_res.unwrap();
-    //         let value = msg.payload().unwrap();
-    //         let value_str = str::from_utf8(value).unwrap();
-    //         let received_route = serde_json::from_str::<Route>(value_str).expect("error when parsing json route");
+    println!("starting listening on topics: ");
+    thread::spawn(move || loop {
+        for msg_res in consumer.iter() {
+            let msg = msg_res.unwrap();
+            let value = msg.payload().unwrap();
+            let value_str = str::from_utf8(value).unwrap();
+            let received_route = serde_json::from_str::<KafkaRouteRequest>(value_str)
+                .expect("error when parsing json kafka route");
 
-    //         println!("received value: {:?}", received_route);
-    //     }
-    // });
+            let route = Route {
+                client_id: received_route.client_id,
+                route_id: received_route.route_id,
+                positions: RefCell::new(Vec::new())
+            };
 
+            route.load_positions("destinations/1.txt");
+
+            println!("sending positions of fictional_route: ");
+            send_route_to_kafka(&route, "position-tp");
+        }
+    });
+
+    loop {}
+}
+
+fn send_route_to_kafka(route: &Route, topic: &str) {
     let producer: BaseProducer = ClientConfig::new()
         .set("bootstrap.servers", "host.docker.internal:9094")
         .create()
         .expect("invalid client config");
 
-    println!("sending positions of fictional_route: ");
-    for (idx, pos) in fictional_route.positions.borrow().iter().enumerate() {
+    for (idx, pos) in route.positions.borrow().iter().enumerate() {
         let mut partial_route = PartialRoutePosition {
-            id: fictional_route.id,
-            client_id: fictional_route.client_id,
+            route_id: route.route_id.clone(),
+            client_id: route.client_id.clone(),
             position: [pos.lat, pos.lng],
             finished: false
         };
 
-        if idx == fictional_route.positions.borrow().len() - 1 {
+        if idx == route.positions.borrow().len() - 1 {
             partial_route.finished = true;
         }
 
         let route_str = serde_json::to_string_pretty(&partial_route).expect("error when stringfying route");
         producer.send(
-            BaseRecord::to("test")
+            BaseRecord::to(topic)
                 .key(&format!("key-{}", 1))
                 .payload(&route_str)
         ).expect("failed to send message");
@@ -115,4 +136,3 @@ fn main() {
         thread::sleep(Duration::from_secs(1));
     }
 }
-
