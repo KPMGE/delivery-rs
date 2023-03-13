@@ -2,8 +2,11 @@ use rdkafka::config::ClientConfig;
 use rdkafka::consumer::BaseConsumer;
 use rdkafka::consumer::Consumer;
 use rdkafka::Message;
+use rdkafka::producer::BaseProducer;
+use rdkafka::producer::BaseRecord;
 use std::str;
 use std::thread;
+use std::time::Duration;
 
 fn main() {
     // kafka config object
@@ -27,5 +30,20 @@ fn main() {
         }
     });
 
-    loop {}
+    let producer: BaseProducer = ClientConfig::new()
+        .set("bootstrap.servers", "host.docker.internal:9094")
+        .create()
+        .expect("invalid client config");
+
+    for i in 0..100 {
+        println!("sending message: ");
+
+        producer.send(
+            BaseRecord::to("test")
+                .key(&format!("key-{}", i))
+                .payload(&format!("value-{}", i))
+        ).expect("failed to send message");
+
+        thread::sleep(Duration::from_secs(3));
+    }
 }
