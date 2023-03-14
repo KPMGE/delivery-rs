@@ -6,6 +6,7 @@ mod routes;
 #[launch]
 fn rocket() -> _ {
     rocket::build().mount("/", routes![
-        routes::get_all_routes
+        routes::get_all_routes,
+        routes::add_route,
     ])
 }
