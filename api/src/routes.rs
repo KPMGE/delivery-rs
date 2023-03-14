@@ -1,5 +1,5 @@
-use crate::models::{Position, Route};
-use rocket::serde::json::Json;
+use crate::{models::{Position, Route}, repository::Repository};
+use rocket::{serde::json::Json, State};
 
 #[get("/routes")]
 pub fn get_all_routes() -> Json<Vec<Route>> {
@@ -34,8 +34,20 @@ pub fn get_all_routes() -> Json<Vec<Route>> {
 }
 
 #[post("/routes", data = "<new_route>")]
-pub fn add_route(new_route: Json<Route>) -> Json<Route> {
+pub async fn add_route(repo: &State<Repository>, new_route: Json<Route>) -> Json<Route> {
     println!("route received: {:?}", new_route);
+
+    // insert start position
+    let fpos = repo.inner().
+        insert_position(new_route.start_position.clone())
+        .await
+        .expect("error when inserting position into db");
+
+    // insert end position
+    let spos = repo.inner().
+        insert_position(new_route.end_position.clone())
+        .await
+        .expect("error when inserting position into db");
 
     let r = Route {
         id: "1".to_string(),

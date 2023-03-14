@@ -1,13 +1,21 @@
 use rocket::serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Debug, FromForm)]
+#[derive(Serialize, Deserialize, Debug, FromForm, Clone)]
 #[serde(crate = "rocket::serde", rename_all = "camelCase")]
 pub struct Position {
     pub lat: f64,
     pub lng: f64,
 }
 
-#[derive(Serialize, Deserialize, Debug, FromForm)]
+#[derive(Serialize, Deserialize)]
+#[serde(crate = "rocket::serde", rename_all = "camelCase")]
+pub struct PositionDb {
+    pub id: i32,
+    pub lat: f64,
+    pub lng: f64,
+}
+
+#[derive(Serialize, Deserialize, Debug, FromForm, Clone)]
 #[serde(crate = "rocket::serde", rename_all = "camelCase")]
 pub struct Route {
     pub id: String,
