@@ -6,8 +6,11 @@ use rdkafka::producer::BaseRecord;
 use crate::models::{Route, PartialRoutePosition};
 
 pub fn send_route_to_kafka(route: &Route, topic: &str) {
+    let kafka_bootstrap_server = std::env::var("KAFKA_BOOTSTRAP_SERVER")
+        .expect("KAFKA_BOOTSTRAP_SERVER is not set!");
+
     let producer: BaseProducer = ClientConfig::new()
-        .set("bootstrap.servers", "host.docker.internal:9094")
+        .set("bootstrap.servers", kafka_bootstrap_server)
         .create()
         .expect("invalid client config");
 
