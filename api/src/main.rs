@@ -6,10 +6,17 @@ mod routes;
 mod repository;
 
 use repository::Repository;
+use dotenv::dotenv;
 
 #[launch]
 async fn rocket() -> _ {
-    let repo = Repository::new("postgres://postgres:1234@localhost:5432/deliver_rs")
+    // load environment variables
+    dotenv().ok();
+
+    let db_url = std::env::var("DATABASE_URL")
+        .expect("DATABASE_URL must be set");
+
+    let repo = Repository::new(db_url.as_str())
         .await
         .expect("error while connecting to the database");
 
