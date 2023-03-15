@@ -2,12 +2,12 @@ use rocket::serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, FromForm, Clone)]
 #[serde(crate = "rocket::serde", rename_all = "camelCase")]
-pub struct Position {
+pub struct PositionDto {
     pub lat: f64,
     pub lng: f64,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug, FromForm, Clone)]
 #[serde(crate = "rocket::serde", rename_all = "camelCase")]
 pub struct PositionDb {
     pub id: i32,
@@ -17,18 +17,27 @@ pub struct PositionDb {
 
 #[derive(Serialize, Deserialize, Debug, FromForm, Clone)]
 #[serde(crate = "rocket::serde", rename_all = "camelCase")]
-pub struct Route {
-    pub id: String,
+pub struct RouteInputDto {
     pub title: String,
-    pub start_position: Position,
-    pub end_position: Position,
+    pub start_position: PositionDto,
+    pub end_position: PositionDto,
+}
+
+
+#[derive(Serialize, Deserialize, Debug, FromForm, Clone)]
+#[serde(crate = "rocket::serde", rename_all = "camelCase")]
+pub struct RouteOutputDto {
+    pub id: i32,
+    pub title: String,
+    pub start_position: PositionDto,
+    pub end_position: PositionDto,
 }
 
 #[derive(Serialize, Deserialize, Debug, FromForm)]
 #[serde(crate = "rocket::serde", rename_all = "camelCase")]
 pub struct RouteDb {
-    pub id: String,
+    pub id: i32,
     pub title: String,
     pub start_position_id: i32,
-    pub end_position_d: i32,
+    pub end_position_id: i32,
 }
