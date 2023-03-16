@@ -41,3 +41,15 @@ pub struct RouteDb {
     pub start_position_id: i32,
     pub end_position_id: i32,
 }
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct RouteMessage {
+    pub route_id: i32,
+}
+
+#[derive(Debug)]
+pub struct Route {
+    pub route_id: i32,
+    pub client_id: u32
+}
