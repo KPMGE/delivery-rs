@@ -6,6 +6,9 @@ services:
     container_name: api
     volumes:
       - .:/rust/src
+    ports: 
+      - 8000:8000
+      - 3012:3012
     extra_hosts: 
       - "host.docker.internal:172.17.0.1"
 

@@ -4,6 +4,8 @@ use crate::models::{KafkaRouteRequest, Route};
 use crate::producer::send_route_to_kafka;
 
 pub fn consume_route(value_str: String) {
+    println!("received value string: {}", value_str);
+
     let kafka_position_topic = std::env::var("KAFKA_POSITION_TOPIC")
         .expect("KAFKA_POSITION_TOPIC is not set!");
 

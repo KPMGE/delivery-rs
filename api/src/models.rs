@@ -45,11 +45,12 @@ pub struct RouteDb {
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct RouteMessage {
-    pub route_id: i32,
+    pub route_id: String
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Route {
-    pub route_id: i32,
-    pub client_id: u32
+    pub route_id: String,
+    pub client_id: String
 }
