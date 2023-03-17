@@ -2,6 +2,7 @@ mod models;
 mod routes;
 mod repository;
 mod websocket;
+mod kafka;
 
 use std::thread;
 use dotenv::dotenv;
