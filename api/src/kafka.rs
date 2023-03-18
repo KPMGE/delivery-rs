@@ -1,4 +1,7 @@
-use crate::models::Route;
+use crate::models::{Route, KafkaPosition};
+use std::str;
+use rdkafka::consumer::{BaseConsumer, Consumer};
+use rdkafka::Message;
 use rdkafka::producer::Producer;
 use rdkafka::{
     producer::{BaseProducer, BaseRecord},
@@ -25,4 +28,8 @@ pub fn post_route_into_kafka(route: Route, topic: &str, payload: &str) {
     producer.flush(std::time::Duration::from_secs(10));
 
     println!("message sent to kafka!");
+}
+
+pub fn consume_position_from_kafka() {
+    todo!();
 }

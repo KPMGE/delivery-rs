@@ -47,10 +47,20 @@ pub struct RouteDb {
 pub struct RouteMessage {
     pub route_id: String
 }
-
 #[derive(Debug, Serialize, Deserialize)]
+
 #[serde(rename_all = "camelCase")]
 pub struct Route {
     pub route_id: String,
     pub client_id: String
 }
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct KafkaPosition {
+    pub route_id: String,
+    pub client_id: String,
+    pub position: [f64; 2],
+    pub finished: bool
+}
+

@@ -25,7 +25,7 @@ async fn rocket() -> _ {
         .expect("error while connecting to the database");
 
     thread::spawn(|| {
-        let url = "127.0.0.1:3012";
+        let url = "0.0.0.0:3012";
         println!("websocket server on: ws://{}", url);
         ws::listen(url, |out| {
             WebSocketServer { out }
