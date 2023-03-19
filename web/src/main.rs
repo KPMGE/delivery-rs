@@ -1,20 +1,27 @@
 use yew::prelude::*;
 
 #[function_component]
-fn App() -> Html {
-    let counter = use_state(|| 0);
-    let onclick = {
-        let counter = counter.clone();
-        move |_| {
-            let value = *counter + 1;
-            counter.set(value);
-        }
-    };
+fn Select() -> Html {
+    html! {
+        <div class="select">
+            <select class="select-text">
+            <option value="" disabled={true} selected={true}></option>
+                <option value="1">{"Route 1"}</option>
+                <option value="2">{"Route 2"}</option>
+                <option value="3">{"Route 3"}</option>
+            </select>
+			<span class="select-highlight"></span>
+            <span class="select-bar"></span>
+            <label class="select-label">{"Select route"}</label>
+        </div>
+    }
+}
 
+#[function_component]
+fn App() -> Html {
     html! {
         <div>
-            <button {onclick}>{ "+1" }</button>
-            <p>{ *counter }</p>
+            <Select />
         </div>
     }
 }
