@@ -5,6 +5,11 @@ services:
     build: .
     container_name: rust-kafka
     volumes:
-      - .:/rust/src
+      - ./destinations:/simulator/destinations
+    environment: 
+      KAFKA_BOOTSTRAP_SERVER: host.docker.internal:9094
+      KAFKA_ROUTE_TOPIC: new-route
+      KAFKA_CONSUMER_GROUP_ID: my-group-id
+      KAFKA_POSITION_TOPIC: positions
     extra_hosts: 
       - "host.docker.internal:172.17.0.1"

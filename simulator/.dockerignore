@@ -1,0 +1,7 @@
+destinations/
+*.env
+docker-compose.*
+Dockerfile
+.git/
+LICENSE
+README.md
