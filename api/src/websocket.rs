@@ -16,13 +16,9 @@ pub struct WebSocketServer {
 
 impl Handler for WebSocketServer {
     fn on_message(&mut self, msg: ws::Message) -> Result<()> {
-
         let text = msg.as_text().unwrap();
-
         println!("got message: {:?}", text);
-
         let (topic, json_route) = text.split_once(" ").unwrap();
-
 
         match topic {
             "new-route" => { 
