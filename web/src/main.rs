@@ -5,6 +5,8 @@ use components::select::Select;
 
 #[function_component]
 fn App() -> Html {
+    wasm_logger::init(wasm_logger::Config::default());
+
     html! {
         <div>
             <Select />
