@@ -1,7 +1,5 @@
-use crate::models::{Route, KafkaPosition};
+use crate::models::Route;
 use std::str;
-use rdkafka::consumer::{BaseConsumer, Consumer};
-use rdkafka::Message;
 use rdkafka::producer::Producer;
 use rdkafka::{
     producer::{BaseProducer, BaseRecord},
