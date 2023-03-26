@@ -1,5 +1,4 @@
 use log::info;
-// use wasm_bindgen::prelude::Closure;
 use web_sys::{Event, HtmlSelectElement};
 use yew::prelude::*;
 use yew_hooks::prelude::*;
