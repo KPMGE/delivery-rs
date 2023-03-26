@@ -1,4 +1,5 @@
 mod components;
+mod models;
 
 use yew::prelude::*;
 use components::select::Select;

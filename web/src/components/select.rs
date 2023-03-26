@@ -1,12 +1,35 @@
+use gloo_net::http::Request;
 use log::info;
 use web_sys::{Event, HtmlSelectElement};
 use yew::prelude::*;
 use yew_hooks::prelude::*;
 
+use crate::models::Route;
+
 #[function_component]
 pub fn Select() -> Html {
     let ws = use_websocket("ws://localhost:3012".to_string());
     let selected_value = use_state::<Option<i32>, _>(|| None);
+    let routes = use_state::<Vec<Route>, _>(|| vec![]);
+
+    {
+        let routes = routes.clone();
+        use_effect_with_deps(move |_| {
+            let routes = routes.clone();
+            wasm_bindgen_futures::spawn_local(async move {
+                let fetched_routes: Vec<Route> = Request::get("http://localhost:8000/routes")
+                    .send()
+                    .await    
+                    .unwrap()
+                    .json()
+                    .await
+                    .unwrap();
+
+                info!("{:?}", fetched_routes);
+                routes.set(fetched_routes);
+            });
+        }, ());
+    }
 
     let handle_onchange = {
         let selected_value = selected_value.clone();
@@ -19,7 +42,6 @@ pub fn Select() -> Html {
             }
         }
     };
-
 
     let request_route = {
         let selected_value = selected_value.clone();
@@ -49,13 +71,19 @@ pub fn Select() -> Html {
         }
     }
 
+    let route_options = routes
+        .iter()
+        .enumerate()
+        .map(|(idx, route)| html! {
+            <option key={idx} value={format!("{}", idx + 1)}>{route.title.clone()}</option>
+        })
+        .collect::<Html>();
+
     html! {
         <div class="select">
             <select class="select-text" onchange={handle_onchange}>
                 <option value="" disabled={true} selected={true}></option>
-                <option value="1">{"Route 1"}</option>
-                <option value="2">{"Route 2"}</option>
-                <option value="3">{"Route 3"}</option>
+                { route_options }
             </select>
 
             <span class="select-highlight"></span>
